@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "name": 1,
+    "occupied":false,
+    "position":{
+      "x": 118,
+      "y": 96,
+      "width": 202,
+      "height": 140
+    }
+  }
+]
