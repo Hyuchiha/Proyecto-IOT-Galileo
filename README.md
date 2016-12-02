@@ -1,8 +1,6 @@
-# face-detection-node-opencv
+# Parking-SlotDetector-node-opencv
 
-Real-time face detection using OpenCV, Node.js, and WebSockets.
-
-Click [here](http://youtu.be/v2SY0naPBFw) to see it in action.
+Real-time parking detector using OpenCV, Node.js, and WebSockets.
 
 ## Requirements
 
