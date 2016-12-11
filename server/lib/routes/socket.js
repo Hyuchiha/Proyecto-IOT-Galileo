@@ -79,20 +79,27 @@ module.exports = function (socket) {
                              data.position.height], rectColor, rectThickness);
              }
 
-           imRoi.detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt2.xml', {}, function(err, faces) {
-         	    if (err) throw err;
+           imRoi.detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt2.xml', {}, function(err, cars) {
+         	    if (!err){
+                if(cars.length==0){
+                    //TODO
+                    data.occupied = false;
+                    console.log('NO detectObject');
+                }else{
+                    //TODO
+                    data.occupied = true;
 
-         	    for (var i = 0; i < faces.length; i++) {
-           		    face = faces[i];
-           		    im.rectangle([face.x+data.position.x,
-                                face.y+data.position.y],
-                                [face.width, face.height], rectColor, rectThickness);
-         	    }
+                    if(data.occupied_time == ""){
+                        data.occupied_time = new Date();
+                    }else{
+                      var diffMs = (data.occupied_time - new Date());
+                      var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
 
-              if(faces.length==0){
-                data.occupied = false;
-              }else{
-                data.occupied = true;
+                      if(diffMins >1){
+                          console.log('DetectObject');
+                      }
+                    }
+                }
               }
 
               socket.emit('frame', { buffer: im.toBuffer() });
@@ -102,4 +109,24 @@ module.exports = function (socket) {
 
     });
   }, camInterval);
+};
+
+
+/**
+ * You first need to create a formatting function to pad numbers to two digits…
+ **/
+function twoDigits(d) {
+    if(0 <= d && d < 10) return "0" + d.toString();
+    if(-10 < d && d < 0) return "-0" + (-1*d).toString();
+    return d.toString();
+}
+
+/**
+ * …and then create the method to output the date string as desired.
+ * Some people hate using prototypes this way, but if you are going
+ * to apply this to more than one Date object, having it as a prototype
+ * makes sense.
+ **/
+Date.prototype.toMysqlFormat = function() {
+    return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };

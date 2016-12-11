@@ -8,6 +8,8 @@
     "express": "4.10.1",
     "morgan": "1.4.1",
     "opencv": "git+https://github.com/peterbraden/node-opencv.git",
-    "socket.io": "1.2.1"
+    "socket.io": "1.2.1",
+    "restify-errors": "^3.1.0",
+    "restify": "^4.0.3"
   }
 }

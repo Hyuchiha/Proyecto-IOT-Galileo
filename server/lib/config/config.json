@@ -1,12 +1,13 @@
 [
   {
     "id": 1,
-    "name": 1,
     "occupied":false,
+    "record_id": 0,
+    "occupied_time": "",
     "position":{
       "x": 118,
       "y": 96,
-      "width": 202,
+      "width": 180,
       "height": 140
     }
   }
