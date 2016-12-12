@@ -1,0 +1,72 @@
+const restify = require('restify');
+
+var mysql = require('mysql');
+
+Date.prototype.toMysqlFormat = function() {
+    return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
+};
+
+const server = restify.createServer({
+  name: "SmartParking",
+  version: '1.0.0'
+});
+
+var connection = mysql.createConnection({
+  host    :"localhost",
+  user    :"root",
+  password:"root",
+  database:"smartparking"
+});
+
+server.use(restify.acceptParser(server.acceptable));
+server.use(restify.queryParser());
+server.use(restify.bodyParser());
+
+server.post('/history', function (req, res, next) {
+  console.log(req.params);
+  var data = req.params;
+
+  connection.connect();
+
+  connection.query("INSERT INTO record SET ?", {parking_id_parking:data.parking_id, create_at: new Date(data.created_at).toMysqlFormat},
+    function(err,res){
+      if(err) console.log(err);
+
+
+    });
+
+    connection.query('UPDATE parking SET current_status = ? WHERE id_parking= ?;', [data.current_status,data.parking_id],
+      function(err,res){
+        if(err) throw err;
+
+      });
+
+  res.send(201, res.insertId);
+  return next();
+});
+
+
+server.put('/history', function (req, res, next) {
+  console.log(req.params);
+  var data = req.params;
+
+  connection.connect();
+
+  connection.query('UPDATE record SET update_at = ?, time_parking = ? WHERE id_record=?;',[new Date(data.updated_at, data.time_parking, data.id],
+    function(err,res){
+      if(err) console.log(err);
+
+    });
+
+    connection.query('UPDATE parking SET current_status = ? WHERE id_parking= ?;', [data.current_status,data.parking_id],
+      function(err,res){
+        if(err) console.log(err);
+      });
+
+  res.send(201, "Sucess");
+  return next();
+});
+
+server.listen(3000, function () {
+  console.log('%s listening at %s', server.name, server.url);
+});

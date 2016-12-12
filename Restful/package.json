@@ -1,0 +1,12 @@
+{
+  "name": "Resful Server SmartParking",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "restify-errors": "^3.1.0",
+    "restify": "^4.0.3",
+    "mysql": "2.12.0"
+  }
+}
