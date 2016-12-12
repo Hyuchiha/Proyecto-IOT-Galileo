@@ -118,8 +118,6 @@ module.exports = function (socket) {
 
                           console.log('%d -> %j', res.statusCode, res.headers);
                           console.log('%j', obj);
-
-                          data.record_id = obj.id;
                         });
                     }
                   }
@@ -140,6 +138,8 @@ module.exports = function (socket) {
 
                           console.log('%d -> %j', res.statusCode, res.headers);
                           console.log('%j', obj);
+
+                          data.record_id = obj.id;
                         });
                     }
                 }
