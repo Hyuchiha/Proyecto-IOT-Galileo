@@ -1,6 +1,13 @@
 var cv = require('opencv');
 var configLot = require("../../lib/config/config");
 
+var restify = require('restify');
+
+// Creates a JSON client
+var client = restify.createJsonClient({
+  url: 'http://localhost:3000'
+});
+
 // camera properties
 var camWidth = 320;
 var camHeight = 240;
@@ -79,25 +86,61 @@ module.exports = function (socket) {
                              data.position.height], rectColor, rectThickness);
              }
 
-           imRoi.detectObject('../data/hogcascade_cars_sideview.xml', {}, function(err, cars) {
+           imRoi.detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt2.xml', {}, function(err, cars) {
          	    if (!err){
                 if(cars.length==0){
-                    //TODO
-                    data.occupied = false;
-                    console.log('NO detectObject');
+                  if(data.occupied_time != "" || data.occupied_time != null){
+                    var diffMs = (data.occupied_time - new Date());
+                    var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+                    diffMins = diffMins * -1;
+
+                    console.log(diffMins);
+
+                    if(diffMins > 0 && data.occupied){
+                        data.occupied = false;
+                        console.log('NO detectObject');
+
+                        var dateNew = new Date();
+
+                        var post = {
+                          id: data.record_id,
+                          parking_id : data.id,
+                          created_at : data.occupied_time.toMysqlFormat(),
+                          updated_at : dateNew.toMysqlFormat(),
+                          time_parking: minutesBetween(data.occupied_time, dateNew),
+                          current_status: data.occupied,
+                        }
+
+                        client.put('/history', post, function(err, req, res, obj) {
+                          if(err) console.log(err);
+
+                          data.occupied_time = "";
+
+                          console.log('%d -> %j', res.statusCode, res.headers);
+                          console.log('%j', obj);
+
+                          data.record_id = obj.id;
+                        });
+                    }
+                  }
                 }else{
-                    //TODO
-                    data.occupied = true;
-
-                    if(data.occupied_time == ""){
+                    if(data.occupied_time == "" && !data.occupied){
+                      console.log("new record");
                         data.occupied_time = new Date();
-                    }else{
-                      var diffMs = (data.occupied_time - new Date());
-                      var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+                        data.occupied = true;
 
-                      if(diffMins >1){
-                          console.log('DetectObject');
-                      }
+                        var post = {
+                          parking_id : data.id,
+                          created_at : data.occupied_time.toMysqlFormat(),
+                          current_status: data.occupied,
+                        }
+
+                        client.post('/history', post, function(err, req, res, obj) {
+                          if(err) console.log(err);
+
+                          console.log('%d -> %j', res.statusCode, res.headers);
+                          console.log('%j', obj);
+                        });
                     }
                 }
               }
@@ -111,6 +154,13 @@ module.exports = function (socket) {
   }, camInterval);
 };
 
+
+function minutesBetween(date1, date2){
+  var diffMs = (date1- date2);
+  var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+  diffMins = diffMins * -1;
+  return diffMins;
+}
 
 /**
  * You first need to create a formatting function to pad numbers to two digits…
