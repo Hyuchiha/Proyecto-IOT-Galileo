@@ -32,7 +32,6 @@ module.exports = function (socket) {
     camera.read(function(err, im) {
       if (err) throw err;
 
-      // obtain the frame
       var gray = im.copy();
 
       // if the fisrt frame is None, initialize it
@@ -50,6 +49,7 @@ module.exports = function (socket) {
       frameDelta.absDiff(firstFrame,gray);
 
       // dilate the thereshold image to fill un holes
+      // obtain the frame
       // then find contours on threasholder image
       frameDelta.canny(lowThresh, highThresh);
   	  frameDelta.dilate(nIters);
@@ -79,7 +79,7 @@ module.exports = function (socket) {
                              data.position.height], rectColor, rectThickness);
              }
 
-           imRoi.detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt2.xml', {}, function(err, cars) {
+           imRoi.detectObject('../data/hogcascade_cars_sideview.xml', {}, function(err, cars) {
          	    if (!err){
                 if(cars.length==0){
                     //TODO
